@@ -30,7 +30,6 @@ process.on("multipleResolves", (type, promise, reason) => {
 });
 
 const mongoose = require("mongoose");
-if (!process.env.MONGODB_URL) return;
 
 mongoose.connect(process.env.MONGODB_URL, {
     useNewUrlParser: true,

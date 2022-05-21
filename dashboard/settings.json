@@ -1,0 +1,11 @@
+{
+    "website":{
+        "domain": "http://localhost/"
+    },
+    "config":{
+        "port": 80,
+        "callback": "http://localhost/callback",
+        "clientID": "858737820306243614",
+        "secret": "uivIH1Qe1tLFA8lzIgSiSN8IzQytzedR"
+    }
+}

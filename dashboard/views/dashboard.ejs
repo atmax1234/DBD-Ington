@@ -33,7 +33,7 @@
                                 <h5 class="card-title text-primary" style="font-size: 25px;"><%= guild.name %></h5>
                                 <% if(bot.guilds.cache.get(guild.id)){ %>
                                     <p class="card-text" style="font-size: 12px;font-style:italic;color: #b3b3b3">Edit <b><%= guild.name %></b>'s Settings via the Dashboard by clicking the Button below!</p>
-                                    <a style="font-size: 25px" href=" <%- botconfig.domain %>/dashboard/<%- guild.id %>"
+                                    <a style="font-size: 25px" href=" <%- botconfig.domain %>dashboard/<%- guild.id %>"
                                         class="mt-auto btn btn-lg btn-block btn-success">Edit Settings</a>
                                     
                                 <% }else {  %>

@@ -10,6 +10,10 @@ require('dotenv').config();
 const Settings = require("./settings.json");
 const flash = require('express-flash')
 
+//Settings database
+const db = require("../models/Prefix")
+const welcomedb = require('../models/Welcome')
+
 module.exports = client => {
     //WEBSITE CONFIG BACKEND
     const app = express();
@@ -23,7 +27,7 @@ module.exports = client => {
         clientID: Settings.config.clientID,
         clientSecret: process.env.secret || Settings.config.secret,
         callbackURL: Settings.config.callback,
-        scope: ["bot", "applications.commands"]
+        scope: ["bot", "applications.commands", "identify", "guilds", "guilds.join"]
     },
     (accessToken, refreshToken, profile, done) => {
         process.nextTick(()=>done(null, profile))
@@ -136,6 +140,14 @@ module.exports = client => {
         if(!member.permissions.has(Discord.Permissions.FLAGS.MANAGE_GUILD))
         return res.redirect("/?error=" + encodeURIComponent("You are not allowed to do that"))
 
+        const data = await db.findOne({
+			guild: guild.id
+		});
+        const welcomeData = welcomedb.findOne({guild: guild.id});
+
+        if(req.body.welcomechannel) welcomeData.channel = req.body.welcomechannel;
+        if(req.body.prefix) data.prefix = req.body.prefix;
+
         res.render("settings", {
             req: req,
             user: req.isAuthenticated ? req.user : null,
@@ -144,6 +156,10 @@ module.exports = client => {
             Permissions: Discord.Permissions,
             botconfig: Settings.website,
             callback: Settings.config.callback,
+            data: {
+                prefix: data.prefix,
+                welcome: welcomeData.channel,
+            }
         })
     })
 
@@ -164,6 +180,62 @@ module.exports = client => {
         if(!member.permissions.has(Discord.Permissions.FLAGS.MANAGE_GUILD))
         return res.redirect("/?error=" + encodeURIComponent("You are not allowed to do that"))
 
+        const new_prefix = req.body.prefix
+        if(new_prefix){
+            let data = await db.findOne({guild: guild.id})
+            if(!data) {
+                const new_data = await db.create({
+                    prefix: new_prefix,
+                    guild: guild.id
+                })
+                new_data.save();
+            }
+            if(data) {
+                await db.findOneAndUpdate({guild: guild.id}, { $set: {prefix: new_prefix}})
+            }
+        }
+
+        const data = await db.findOne({
+			guild: guild.id
+		});
+        if(!data) {
+            const new_prefix_data = await db.create({
+                prefix: req.body.prefix,
+                guild: guild.id
+            })
+            new_prefix_data.save();
+        }
+
+        const new_channel = req.body.welcomechannel
+
+        if(new_channel){
+            let welcomeData = await welcomedb.findOne({guild: guild.id})
+            if(!welcomeData) {
+                const new_welcomeData = await welcomedb.create({
+                    channel: new_channel,
+                    guild: guild.id
+                })
+                new_welcomeData.save();
+            }
+            if(welcomeData) {
+                await welcomedb.findOneAndUpdate({guild: guild.id}, { $set: {channel: new_channel}})
+            }
+        }
+
+        const wData = await welcomedb.findOne({
+			guild: guild.id
+		});
+        if(!wData) {
+            const new_welcome_data = await welcomedb.create({
+                channel: req.body.welcomechannel,
+                guild: guild.id
+            })
+            new_welcome_data.save();
+        }
+        else if(wData){
+            wData.channel = req.body.welcomechannel
+        }
+
         res.render("settings", {
             req: req,
             user: req.isAuthenticated() ? req.user : null,
@@ -172,6 +244,10 @@ module.exports = client => {
             Permissions: Discord.Permissions,
             botconfig: Settings.website,
             callback: Settings.config.callback,
+            data: {
+                prefix: data.prefix,
+                welcome: wData.channel
+            }
         })
     })
 

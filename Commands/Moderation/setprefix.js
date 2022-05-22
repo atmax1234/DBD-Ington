@@ -34,7 +34,6 @@ module.exports = {
           if(data) {
               await db.findOneAndUpdate({guild: message.guild.id}, { $set: {prefix: new_prefix}})
               message.reply(`The server prefix is now changed to \`${new_prefix}\``)
-
           }
         
         }

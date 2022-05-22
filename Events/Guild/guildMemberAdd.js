@@ -15,10 +15,12 @@ module.exports = {
             guild: member.guild.id
         }, async (err, data) => {
             if (!data) {
-                console.log("No data for welcome channel model")
                 return;
             }
             const Wchannel = member.guild.channels.cache.get(data.channel)
+            if(!Wchannel) {
+                return;
+            }
             const welcomeCard = new canvacord.Welcomer()
                 .setUsername(member.user.username)
                 .setDiscriminator(member.user.discriminator)
